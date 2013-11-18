@@ -1,4 +1,4 @@
 rest-java
 =========
 
-Globe Oauth and RESTful service wrapper in Java
+Globe OAuth and RESTful service wrapper in Java

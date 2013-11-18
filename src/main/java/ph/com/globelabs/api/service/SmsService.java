@@ -39,7 +39,7 @@ public class SmsService {
      * GlobeOAuthService) must match.
      * 
      * @param recipientNumber
-     *            Parameter format can be +639xxxxxxxxx, 09xxxxxxxx, or
+     *            Parameter format can be 639xxxxxxxxx, 09xxxxxxxx, or
      *            9xxxxxxx.
      * @param message
      *            Message must be 160 characters or less.
