@@ -18,7 +18,7 @@ public class ChargeUserParameters {
      * Defines parameters for charging a subscriber.
      * 
      * @param subscriberNumber
-     *            The nine-digit subscriber number with format 9xxxxxxxxx
+     *            The ten digit subscriber number with format 9xxxxxxxxx.
      * @param referenceCode
      *            Unique reference code to identify the transaction.
      * @param amount
