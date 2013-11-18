@@ -1,6 +1,11 @@
 package ph.com.globelabs.api.response;
 
+import java.io.IOException;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.ParseException;
+import org.apache.http.StatusLine;
 
 /**
  * This class holds a response code and response message which represents the
@@ -13,13 +18,16 @@ public class Response {
     private int responseCode;
     private String responseMessage;
 
-    private HttpResponse httpResponse;
+    private StatusLine statusLine;
+    private String content;
 
-    public Response(HttpResponse httpResponse) {
+    public Response(HttpResponse httpResponse) throws ParseException,
+            IOException {
         this.responseCode = httpResponse.getStatusLine().getStatusCode();
         this.responseMessage = httpResponse.getStatusLine().getReasonPhrase();
 
-        this.httpResponse = httpResponse;
+        this.statusLine = httpResponse.getStatusLine();
+        this.content = IOUtils.toString(httpResponse.getEntity().getContent());
     }
 
     public Response(int statusCode, String reasonPhrase) {
@@ -31,30 +39,23 @@ public class Response {
         return responseCode;
     }
 
-    public void setResponseCode(int responseCode) {
-        this.responseCode = responseCode;
-    }
-
     public String getResponseMessage() {
         return responseMessage;
     }
 
-    public void setResponseMessage(String responseMessage) {
-        this.responseMessage = responseMessage;
+    public StatusLine getStatusLine() {
+        return statusLine;
     }
 
-    public HttpResponse getHttpResponse() {
-        return httpResponse;
-    }
-
-    public void setHttpResponse(HttpResponse httpResponse) {
-        this.httpResponse = httpResponse;
+    public String getContent() {
+        return content;
     }
 
     @Override
     public String toString() {
         return "Response [responseCode=" + responseCode + ", responseMessage="
-                + responseMessage + ", httpResponse=" + httpResponse + "]";
+                + responseMessage + ", statusLine=" + statusLine + ", content="
+                + content + "]";
     }
 
 }

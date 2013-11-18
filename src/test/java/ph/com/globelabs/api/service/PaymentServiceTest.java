@@ -21,7 +21,7 @@ import org.junit.Test;
 import ph.com.globelabs.api.exception.ParameterRequiredException;
 import ph.com.globelabs.api.exception.ServiceException;
 import ph.com.globelabs.api.request.ChargeUserParameters;
-import ph.com.globelabs.api.request.HttpPostJsonClient;
+import ph.com.globelabs.api.request.HttpPostClient;
 import ph.com.globelabs.api.response.ChargeUserResponse;
 import ph.com.globelabs.api.service.PaymentService;
 
@@ -31,7 +31,7 @@ public class PaymentServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        HttpPostJsonClient client = new HttpPostJsonClient() {
+        HttpPostClient client = new HttpPostClient() {
             @Override
             public HttpResponse execute(String requestUri) {
                 try {
@@ -45,7 +45,12 @@ public class PaymentServiceTest {
             }
         };
 
-        paymentService = new PaymentService(client);
+        paymentService = new PaymentService() {
+            public PaymentService setClient(HttpPostClient client) {
+                this.client = client;
+                return this;
+            }
+        }.setClient(client);
     }
 
     @Test

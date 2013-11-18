@@ -2,7 +2,6 @@ package ph.com.globelabs.api.response;
 
 import java.io.IOException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,8 +29,7 @@ public class SendSmsResponse extends Response {
             throws IllegalStateException, JSONException, IOException {
         super(httpResponse);
 
-        JSONObject responseContent = new JSONObject(
-                IOUtils.toString(httpResponse.getEntity().getContent()));
+        JSONObject responseContent = new JSONObject(super.getContent());
         if (responseContent.has("success")) {
             this.success = responseContent.getBoolean("success");
             this.message = responseContent.getString("message");

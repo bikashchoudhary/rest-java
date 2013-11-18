@@ -14,7 +14,7 @@ import org.json.JSONObject;
 
 import ph.com.globelabs.api.exception.ParameterRequiredException;
 import ph.com.globelabs.api.exception.ServiceException;
-import ph.com.globelabs.api.request.HttpPostJsonClient;
+import ph.com.globelabs.api.request.HttpPostClient;
 import ph.com.globelabs.api.response.SendSmsResponse;
 import ph.com.globelabs.api.util.UriBuilder;
 
@@ -22,16 +22,15 @@ public class SmsService {
 
     private final static String SEND_SMS_URI = "http://devapi.globelabs.com.ph/smsmessaging/v1/outbound/{shortCode}/requests";
 
-    private HttpPostJsonClient client;
+    protected HttpPostClient client;
 
-    public SmsService() {
+    public SmsService() throws ServiceException {
         super();
-        client = new HttpPostJsonClient();
-    }
-
-    public SmsService(HttpPostJsonClient client) {
-        super();
-        this.client = client;
+        try {
+            client = new HttpPostClient();
+        } catch (UnsupportedEncodingException e) {
+            throw new ServiceException(e.getMessage(), e);
+        }
     }
 
     /**
@@ -40,7 +39,7 @@ public class SmsService {
      * GlobeOAuthService) must match.
      * 
      * @param recipientNumber
-     *            Parameter format can be +639xxxx­xxxxxx, 09xxxxxxxx, or
+     *            Parameter format can be +639xxxxxxxxx, 09xxxxxxxx, or
      *            9xxxxxxx.
      * @param message
      *            Message must be 160 characters or less.
@@ -119,12 +118,8 @@ public class SmsService {
         return stringEntity;
     }
 
-    public HttpPostJsonClient getClient() {
+    public HttpPostClient getClient() {
         return client;
-    }
-
-    public void setClient(HttpPostJsonClient client) {
-        this.client = client;
     }
 
 }

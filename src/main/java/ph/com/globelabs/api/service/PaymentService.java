@@ -12,7 +12,7 @@ import org.json.JSONException;
 import ph.com.globelabs.api.exception.ParameterRequiredException;
 import ph.com.globelabs.api.exception.ServiceException;
 import ph.com.globelabs.api.request.ChargeUserParameters;
-import ph.com.globelabs.api.request.HttpPostJsonClient;
+import ph.com.globelabs.api.request.HttpPostClient;
 import ph.com.globelabs.api.response.ChargeUserResponse;
 import ph.com.globelabs.api.util.UriBuilder;
 
@@ -20,25 +20,24 @@ public class PaymentService {
 
     private final static String CHARGE_USER_URI = "http://devapi.globelabs.com.ph/payment/v1/transactions/amount";
 
-    private HttpPostJsonClient client;
+    protected HttpPostClient client;
 
-    public PaymentService() {
+    public PaymentService() throws ServiceException {
         super();
-        client = new HttpPostJsonClient();
-    }
-
-    public PaymentService(HttpPostJsonClient client) {
-        super();
-        this.client = client;
+        try {
+            client = new HttpPostClient();
+        } catch (UnsupportedEncodingException e) {
+            throw new ServiceException(e.getMessage(), e);
+        }
     }
 
     /**
      * Charges a subscriber who has already completed the authorization process.
-     * endUserId (as defined in {@link ChargeUserParameters} and accessToken
-     * must match.
+     * subscriberNumber (as defined in {@link ChargeUserParameters} and
+     * accessToken must match.
      * 
      * @param parameters
-     *            endUserId (subscriber number), amount, and reference code. See
+     *            subscriberNumber, amount, and reference code. See
      *            {@link ChargeUserParameters}.
      * @param accessToken
      *            Access token for the given subscriber.
@@ -89,12 +88,8 @@ public class PaymentService {
         return UriBuilder.buildToString(CHARGE_USER_URI, parameters);
     }
 
-    public HttpPostJsonClient getClient() {
+    public HttpPostClient getClient() {
         return client;
-    }
-
-    public void setClient(HttpPostJsonClient client) {
-        this.client = client;
     }
 
 }

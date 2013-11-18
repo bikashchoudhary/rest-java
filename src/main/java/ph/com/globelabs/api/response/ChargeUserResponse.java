@@ -4,15 +4,14 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * This object is created from the expected response of the server. Obtainable
- * information include the following: success, amount, endUserId, referenceCode,
- * accessToken, and error (if any).
+ * information include the following: success, amount, subscriberNumber,
+ * referenceCode, accessToken, and error (if any).
  * 
  * This response also has a responseCode, responseMessage, and holds the raw
  * HttpResponse. See {@link Response}.
@@ -22,7 +21,7 @@ public class ChargeUserResponse extends Response {
 
     private boolean success;
     private BigDecimal amount;
-    private String endUserId;
+    private String subscriberNumber;
     private String referenceCode;
     private String accessToken;
 
@@ -32,14 +31,13 @@ public class ChargeUserResponse extends Response {
             throws IllegalStateException, JSONException, IOException {
         super(httpResponse);
 
-        JSONObject responseContent = new JSONObject(
-                IOUtils.toString(httpResponse.getEntity().getContent()));
+        JSONObject responseContent = new JSONObject(super.getContent());
 
         if (responseContent.has("success")) {
             this.amount = new BigDecimal(responseContent.getString("amount"))
                     .setScale(2, RoundingMode.CEILING);
             this.success = responseContent.getBoolean("success");
-            this.endUserId = responseContent.getString("endUserId");
+            this.subscriberNumber = responseContent.getString("endUserId");
             this.referenceCode = responseContent.getString("referenceCode");
             this.accessToken = responseContent.getString("access_token");
         }
@@ -58,8 +56,8 @@ public class ChargeUserResponse extends Response {
         return success;
     }
 
-    public String getEndUserId() {
-        return endUserId;
+    public String getSubscriberNumber() {
+        return subscriberNumber;
     }
 
     public String getAccessToken() {
@@ -81,10 +79,10 @@ public class ChargeUserResponse extends Response {
     @Override
     public String toString() {
         if (success == true) {
-            return "ChargeUserResponse [success=" + success + ", amount = "
-                    + amount.toString() + ", endUserId=" + endUserId
-                    + ", referenceCode=" + referenceCode + ", accessToken="
-                    + accessToken + "] " + super.toString();
+            return "ChargeUserResponse [success=" + success + ", amount="
+                    + amount.toString() + ", subscriberNumber="
+                    + subscriberNumber + ", referenceCode=" + referenceCode
+                    + ", accessToken=" + accessToken + "] " + super.toString();
         } else {
             return "ChargeUserResponse [error=" + error + "] "
                     + super.toString();

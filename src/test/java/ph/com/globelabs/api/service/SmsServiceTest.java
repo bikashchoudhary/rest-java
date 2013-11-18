@@ -19,16 +19,16 @@ import org.junit.Test;
 
 import ph.com.globelabs.api.exception.ParameterRequiredException;
 import ph.com.globelabs.api.exception.ServiceException;
-import ph.com.globelabs.api.request.HttpPostJsonClient;
+import ph.com.globelabs.api.request.HttpPostClient;
 import ph.com.globelabs.api.response.Response;
 
-public class SendSmsServiceTest {
+public class SmsServiceTest {
 
     private SmsService smsService;
 
     @Before
     public void setUp() throws Exception {
-        HttpPostJsonClient client = new HttpPostJsonClient() {
+        HttpPostClient client = new HttpPostClient() {
             @Override
             public HttpResponse execute(String requestUri) {
                 try {
@@ -41,8 +41,13 @@ public class SendSmsServiceTest {
                 return null;
             }
         };
-
-        smsService = new SmsService(client);
+        
+        smsService = new SmsService() {
+            public SmsService setClient(HttpPostClient client) {
+                this.client = client;
+                return this;
+            }
+        }.setClient(client);
     }
 
     @Test

@@ -24,21 +24,6 @@ public class UriBuilder {
      */
     public static String buildToString(String requestUri,
             Map<String, String> parameters) throws URISyntaxException {
-        return build(requestUri, parameters).toString();
-    }
-
-    /**
-     * Builds a URI.
-     * 
-     * @param requestUri
-     *            Existing URI with protocol, host, and get parameters (if any).
-     * @param parameters
-     *            A Map of get parameters. The parameter name is the key.
-     * @return URI with added get parameters.
-     * @throws URISyntaxException
-     */
-    public static URIBuilder build(String requestUri,
-            Map<String, String> parameters) throws URISyntaxException {
         URIBuilder builder = new URIBuilder(requestUri);
 
         if (parameters != null) {
@@ -48,7 +33,7 @@ public class UriBuilder {
             }
         }
 
-        return builder;
+        return builder.toString();
     }
 
 }

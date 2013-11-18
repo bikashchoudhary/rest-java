@@ -2,12 +2,9 @@ package ph.com.globelabs.api.response;
 
 import java.io.IOException;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import ph.com.globelabs.api.exception.ServiceException;
 
 /**
  * This object is created from the expected response of the server. Obtainable
@@ -22,34 +19,28 @@ public class AccessTokenResponse extends Response {
     private String accessToken;
     private String subscriberNumber;
 
+    private String error;
+
     public AccessTokenResponse(HttpResponse httpResponse)
-            throws ServiceException {
+            throws IllegalStateException, JSONException, IOException {
         super(httpResponse);
 
-        try {
-            JSONObject responseContent = new JSONObject(
-                    IOUtils.toString(httpResponse.getEntity().getContent()));
+        JSONObject responseContent = new JSONObject(super.getContent());
 
-            if (responseContent.has("access_token")
-                    && responseContent.has("subscriber_number")) {
-                this.accessToken = responseContent.getString("access_token");
-                this.subscriberNumber = responseContent
-                        .getString("subscriber_number");
-            } else if (responseContent.has("error")) {
-                throw new ServiceException(responseContent.getString("error"));
-            } else {
-                throw new ServiceException(
-                        "Cannot parse response. Original Response Content: "
-                                + IOUtils.toString(httpResponse.getEntity()
-                                        .getContent()));
-            }
-        } catch (JSONException e) {
-            throw new ServiceException("Cannot parse response.");
-        } catch (IllegalStateException e) {
-            throw new ServiceException("Cannot parse response.");
-        } catch (IOException e) {
-            throw new ServiceException("Cannot parse response.");
+        if (responseContent.has("access_token")
+                && responseContent.has("subscriber_number")) {
+            this.accessToken = responseContent.getString("access_token");
+            this.subscriberNumber = responseContent
+                    .getString("subscriber_number");
         }
+
+        if (responseContent.has("error")) {
+            this.error = responseContent.getString("error");
+        }
+    }
+
+    public AccessTokenResponse(int statusCode, String reasonPhrase) {
+        super(statusCode, reasonPhrase);
     }
 
     public String getAccessToken() {
@@ -60,10 +51,20 @@ public class AccessTokenResponse extends Response {
         return subscriberNumber;
     }
 
+    public String getError() {
+        return error;
+    }
+
     @Override
     public String toString() {
-        return "AccessTokenResponse [accessToken=" + accessToken
-                + ", subscriberNumber=" + subscriberNumber + "]";
+        if (error == null) {
+            return "AccessTokenResponse [accessToken=" + accessToken
+                    + ", subscriberNumber=" + subscriberNumber + "] "
+                    + super.toString();
+        } else {
+            return "AccessTokenResponse [error=" + error + "] "
+                    + super.toString();
+        }
     }
 
 }

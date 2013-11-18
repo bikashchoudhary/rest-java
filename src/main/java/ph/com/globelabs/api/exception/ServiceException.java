@@ -8,8 +8,4 @@ public class ServiceException extends Exception {
         super(message, cause);
     }
 
-    public ServiceException(String message) {
-        super(message);
-    }
-
 }
