@@ -32,8 +32,8 @@ public class GlobeOAuthService {
     }
 
     /**
-     * Builds a login URL from the request URI, a given app ID, and redirect
-     * URL. This URL is used for the OAuth first leg.
+     * Builds a login URL from the request URI and a given app ID. This URL is
+     * used for the OAuth first leg.
      * 
      * @param appId
      *            Given app ID by Globe Labs
