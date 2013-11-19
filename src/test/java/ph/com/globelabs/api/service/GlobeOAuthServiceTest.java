@@ -58,13 +58,25 @@ public class GlobeOAuthServiceTest {
     }
 
     @Test
-    public void getAccessToken() throws ServiceException {
+    public void getAccessTokenViaCode() throws ServiceException {
         String appId = "345SDxcblesfUSDoifw3ljsdfwou35aj";
         String appSecret = "93SDf34587SDflk345u98SDFH359875987F3489SfdfESF45897egjldkfjgW348";
         String code = "93SDf34587SDflk345u98SDFH359875987F3489SfdfESF45897egjldkfjgW348967ES3648SDFJOi3u489df346jDSFkl34598sdfD34897DGXLkj987ZFnzljfdioSDF342987OCIIzn43fszxvnZV89w2324uiDFDS458fSDCzjkxczwer82349ZSDF23798dl2k4hkh2lSDf23894jhdskjfhkjhkjhjDKJSJFH34458394578989234FDS";
 
         AccessTokenResponse response = globeOAuthService.getAccessToken(appId,
                 appSecret, code);
+        assertEquals(200, response.getResponseCode());
+        assertEquals("OK", response.getResponseMessage());
+        assertEquals("_Ak28sdfl32r908sdf0q843qjlkjdf90234jlkasd98",
+                response.getAccessToken());
+        assertEquals("9173849494", response.getSubscriberNumber());
+    }
+
+    @Test
+    public void getAccessTokenViaURL() throws ServiceException {
+        String url = "http://www.callback-123.com/?access_token=_Ak28sdfl32r908sdf0q843qjlkjdf90234jlkasd98&subscriber_number=9173849494";
+
+        AccessTokenResponse response = globeOAuthService.getAccessToken(url);
         assertEquals(200, response.getResponseCode());
         assertEquals("OK", response.getResponseMessage());
         assertEquals("_Ak28sdfl32r908sdf0q843qjlkjdf90234jlkasd98",

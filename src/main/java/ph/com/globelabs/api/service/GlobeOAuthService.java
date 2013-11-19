@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.utils.URIBuilder;
 import org.json.JSONException;
 
 import ph.com.globelabs.api.exception.ServiceException;
@@ -32,8 +35,8 @@ public class GlobeOAuthService {
     }
 
     /**
-     * Builds a login URL from the request URI and a given app ID. This URL is
-     * used for the OAuth first leg.
+     * Builds a login URL from a given app ID. This URL is used for the OAuth
+     * first leg.
      * 
      * @param appId
      *            Given app ID by Globe Labs
@@ -64,7 +67,7 @@ public class GlobeOAuthService {
      * @param code
      *            The code sent by Globe Labs to the callback URL after
      *            subscriber has completed the web authentication process
-     * @return Access token
+     * @return Access token and subscriber number
      * @throws ServiceException
      */
     public AccessTokenResponse getAccessToken(String appId, String appSecret,
@@ -100,6 +103,44 @@ public class GlobeOAuthService {
             throw new ServiceException(e.getMessage(), e);
         } catch (JSONException e) {
             throw new ServiceException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Parses the access token for a given subscriber provided the subscriber
+     * has completed the authentication process via SMS.
+     * 
+     * @param requestURL
+     *            The callback URL along with the query parameters as called by
+     *            the system upon SMS subscription by the user. Query parameters
+     *            must include access_token and subscription_number.
+     * @return Access token and subscriber number
+     * @throws ServiceException
+     */
+    public AccessTokenResponse getAccessToken(String requestURL)
+            throws ServiceException {
+        try {
+            URIBuilder builder = new URIBuilder(requestURL);
+            List<NameValuePair> queryParams = builder.getQueryParams();
+
+            String accessToken = null;
+            String subscriberNumber = null;
+
+            for (NameValuePair pair : queryParams) {
+                if ("access_token".equals(pair.getName())) {
+                    accessToken = pair.getValue();
+                } else if ("subscriber_number".equals(pair.getName())) {
+                    subscriberNumber = pair.getValue();
+                }
+            }
+
+            if (accessToken == null || subscriberNumber == null) {
+                throw new ServiceException("Request URL cannot be parsed");
+            } else {
+                return new AccessTokenResponse(accessToken, subscriberNumber);
+            }
+        } catch (URISyntaxException e) {
+            throw new ServiceException("Request URL cannot be parsed", e);
         }
     }
 

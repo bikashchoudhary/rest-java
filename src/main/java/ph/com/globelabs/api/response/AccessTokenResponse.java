@@ -39,6 +39,12 @@ public class AccessTokenResponse extends Response {
         }
     }
 
+    public AccessTokenResponse(String accessToken, String subscriberNumber) {
+        super(200, "OK");
+        this.accessToken = accessToken;
+        this.subscriberNumber = subscriberNumber;
+    }
+
     public AccessTokenResponse(int statusCode, String reasonPhrase) {
         super(statusCode, reasonPhrase);
     }
