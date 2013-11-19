@@ -37,24 +37,19 @@ public class GlobeOAuthService {
      * 
      * @param appId
      *            Given app ID by Globe Labs
-     * @param redirectURL
-     *            Callback URL after user authorization
      * @return Login URL for user subscription and authentication to the app
      * @throws ServiceException
      */
-    public String getLoginUrl(String appId, String redirectURL)
-            throws ServiceException {
+    public String getLoginUrl(String appId) throws ServiceException {
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put("app_id", appId);
-        parameters.put("redirect_url", redirectURL);
 
         try {
             String loginUrl = UriBuilder.buildToString(REQUEST_URI, parameters);
             return loginUrl;
         } catch (URISyntaxException e) {
             throw new ServiceException(
-                    "Given appId or redirectURL is invalid. Login URL cannot be parsed.",
-                    e);
+                    "Given appId is invalid. Login URL cannot be parsed.", e);
         }
     }
 

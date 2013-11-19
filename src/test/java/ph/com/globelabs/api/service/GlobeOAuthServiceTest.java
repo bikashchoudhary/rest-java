@@ -50,11 +50,9 @@ public class GlobeOAuthServiceTest {
     @Test
     public void getLoginUrl() throws ServiceException {
         String appId = "345SDxcblesfUSDoifw3ljsdfwou35aj";
-        String redirectURL = "http://www.callback-url.com/123abc";
 
-        String expectedLoginURL = "http://developer.globelabs.com.ph/dialog/oauth?redirect_url=http%3A%2F%2Fwww.callback-url.com%2F123abc&app_id=345SDxcblesfUSDoifw3ljsdfwou35aj";
-        String actualLoginURL = globeOAuthService.getLoginUrl(appId,
-                redirectURL);
+        String expectedLoginURL = "http://developer.globelabs.com.ph/dialog/oauth?app_id=345SDxcblesfUSDoifw3ljsdfwou35aj";
+        String actualLoginURL = globeOAuthService.getLoginUrl(appId);
 
         assertEquals(expectedLoginURL, actualLoginURL);
     }
