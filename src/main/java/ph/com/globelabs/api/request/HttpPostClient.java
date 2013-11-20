@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -14,6 +16,8 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import ph.com.globelabs.api.util.UriBuilder;
 
@@ -48,6 +52,21 @@ public class HttpPostClient {
 
     public void setEntity(HttpEntity entity) {
         this.request.setEntity(entity);
+    }
+
+    public void setJsonStringEntity(Map<String, String> parameters)
+            throws JSONException {
+        JSONObject requestContent = new JSONObject();
+        Set<String> names = parameters.keySet();
+
+        for (String name : names) {
+            requestContent.put(name, parameters.get(name));
+        }
+
+        StringEntity stringEntity = new StringEntity(requestContent.toString(),
+                Charset.defaultCharset());
+        
+        this.request.setEntity(stringEntity);
     }
 
 }

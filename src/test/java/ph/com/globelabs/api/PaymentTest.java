@@ -1,4 +1,4 @@
-package ph.com.globelabs.api.service;
+package ph.com.globelabs.api;
 
 import static org.junit.Assert.assertEquals;
 
@@ -18,16 +18,15 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 
+import ph.com.globelabs.api.Payment;
+import ph.com.globelabs.api.exception.GlobeApiException;
 import ph.com.globelabs.api.exception.ParameterRequiredException;
-import ph.com.globelabs.api.exception.ServiceException;
-import ph.com.globelabs.api.request.ChargeUserParameters;
 import ph.com.globelabs.api.request.HttpPostClient;
 import ph.com.globelabs.api.response.ChargeUserResponse;
-import ph.com.globelabs.api.service.PaymentService;
 
-public class PaymentServiceTest {
+public class PaymentTest {
 
-    private PaymentService paymentService;
+    private Payment payment;
 
     @Before
     public void setUp() throws Exception {
@@ -45,8 +44,10 @@ public class PaymentServiceTest {
             }
         };
 
-        paymentService = new PaymentService() {
-            public PaymentService setClient(HttpPostClient client) {
+        String subscriberNumber = "9173849494";
+        String accessToken = "_Ak28sdfl32r908sdf0q843qjlkjdf90234jlkasd98";
+        payment = new Payment(subscriberNumber, accessToken) {
+            public Payment setClient(HttpPostClient client) {
                 this.client = client;
                 return this;
             }
@@ -56,15 +57,12 @@ public class PaymentServiceTest {
     @Test
     public void chargeUser() throws ClientProtocolException,
             UnsupportedEncodingException, IOException, JSONException,
-            ServiceException, ParameterRequiredException {
-        ChargeUserParameters parameters = new ChargeUserParameters(
-                "9173849494", "REF-12345", new BigDecimal("10"));
-        String accessToken = "_Ak28sdfl32r908sdf0q843qjlkjdf90234jlkasd98";
-
-        ChargeUserResponse response = paymentService.chargeUser(parameters,
-                accessToken);
+            GlobeApiException, ParameterRequiredException {
+        String referenceCode = "REF-12345";
+        BigDecimal amount = new BigDecimal("10");
+        ChargeUserResponse response = payment.charge(amount, referenceCode);
         assertEquals(201, response.getResponseCode());
-
+        assertEquals("Created", response.getResponseMessage());
         assertEquals("10.00", response.getAmount().toString());
     }
 

@@ -1,4 +1,4 @@
-package ph.com.globelabs.api.service;
+package ph.com.globelabs.api;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -12,70 +12,75 @@ import java.util.Map;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.entity.StringEntity;
 import org.json.JSONException;
-import org.json.JSONObject;
 
+import ph.com.globelabs.api.exception.GlobeApiException;
 import ph.com.globelabs.api.exception.ParameterRequiredException;
-import ph.com.globelabs.api.exception.ServiceException;
 import ph.com.globelabs.api.request.HttpPostClient;
 import ph.com.globelabs.api.response.SendSmsResponse;
 import ph.com.globelabs.api.response.SmsResponse;
 import ph.com.globelabs.api.util.UriBuilder;
 
-public class SmsService {
+public class Sms {
 
-    private final static String SEND_SMS_URI = "http://devapi.globelabs.com.ph/smsmessaging/v1/outbound/{shortCode}/requests";
+    private final static String SEND_SMS_URI = "http://devapi.globelabs.com.ph/smsmessaging/{version}/outbound/{shortCode}/requests";
 
     protected HttpPostClient client;
 
-    public SmsService() throws ServiceException {
+    protected String version = "v1";
+    protected String shortCode;
+
+    /**
+     * 
+     * @param shortCode
+     *            The last 4 digits of your app short code (2158XXXX).
+     * @throws GlobeApiException
+     */
+    public Sms(String shortCode) throws GlobeApiException {
         super();
+
+        this.shortCode = shortCode;
+
         try {
             client = new HttpPostClient();
         } catch (UnsupportedEncodingException e) {
-            throw new ServiceException(e.getMessage(), e);
+            throw new GlobeApiException(e.getMessage(), e);
         }
+    }
+
+    public boolean isValid(String message, String subscriberNumber,
+            String accessToken) {
+        return message == null || message.length() > 160
+                || subscriberNumber == null || accessToken == null;
     }
 
     /**
      * Sends an SMS to a subscriber who has already completed the authorization
-     * process. Recipient number and access token (as obtained from
-     * GlobeOAuthService) must match.
+     * process.
      * 
-     * @param recipientNumber
+     * @param subscriberNumber
      *            The ten digit subscriber number with format 9xxxxxxxxx.
+     *            Subscriber number and access token must match.
+     * @param accessToken
+     *            Access token for the given subscriber. Subscriber number and
+     *            access token must match.
      * @param message
      *            Message must be 160 characters or less.
-     * @param accessToken
-     *            Access token for the given subscriber.
-     * @param shortCode
-     *            The last 4 digits of your app short code (2158XXXX).
      * @return See {@link SendSmsResponse}
      * @throws ParameterRequiredException
-     * @throws ServiceException
+     * @throws GlobeApiException
      */
-    public SendSmsResponse sendSms(String recipientNumber, String message,
-            String accessToken, String shortCode)
-            throws ParameterRequiredException, ServiceException {
+    public SendSmsResponse send(String subscriberNumber, String accessToken,
+            String message) throws ParameterRequiredException,
+            GlobeApiException {
         try {
-            if (message == null || message.length() > 160
-                    || recipientNumber == null) {
-                String exceptionMessage = "";
-                if (message == null) {
-                    exceptionMessage += "Message must not be null. ";
-                } else if (message.length() > 160) {
-                    exceptionMessage += "Message must not exceed 160 characters. ";
-                }
-                if (recipientNumber == null) {
-                    exceptionMessage += "Address must not be null. ";
-                }
-                throw new ParameterRequiredException(exceptionMessage);
-            }
+            validateParameters(message, subscriberNumber, accessToken);
 
-            String requestUri = buildRequestURI(shortCode, accessToken);
-            client.setEntity(buildJsonStringEntity(recipientNumber, message));
-            HttpResponse response = client.execute(requestUri);
+            Map<String, String> parameters = new HashMap<String, String>();
+            parameters.put("address", subscriberNumber);
+            parameters.put("message", message);
+            client.setJsonStringEntity(parameters);
+            HttpResponse response = client.execute(getRequestURI(accessToken));
 
             String contentType = response.getEntity().getContentType()
                     .getValue();
@@ -88,22 +93,38 @@ public class SmsService {
                         .getStatusCode(), response.getStatusLine()
                         .getReasonPhrase());
             }
-        } catch (IllegalStateException e) {
-            throw new ServiceException(e.getMessage(), e);
         } catch (JSONException e) {
-            throw new ServiceException(e.getMessage(), e);
+            throw new GlobeApiException(e.getMessage(), e);
         } catch (IOException e) {
-            throw new ServiceException(e.getMessage(), e);
+            throw new GlobeApiException(e.getMessage(), e);
         } catch (URISyntaxException e) {
-            throw new ServiceException(e.getMessage(), e);
+            throw new GlobeApiException(e.getMessage(), e);
         }
     }
 
-    private String buildRequestURI(String shortCode, String accessToken)
-            throws URISyntaxException, UnsupportedEncodingException {
+    private void validateParameters(String message, String subscriberNumber,
+            String accessToken) throws ParameterRequiredException {
+        if (isValid(message, subscriberNumber, accessToken)) {
+            String exceptionMessage = "";
+            if (message == null) {
+                exceptionMessage += "Message must not be null. ";
+            } else if (message.length() > 160) {
+                exceptionMessage += "Message must not exceed 160 characters. ";
+            }
+            if (subscriberNumber == null || accessToken == null) {
+                exceptionMessage += "Subscriber number and access token must not be null. ";
+            }
+            throw new ParameterRequiredException(exceptionMessage);
+        }
+    }
+
+    private String getRequestURI(String accessToken) throws URISyntaxException,
+            UnsupportedEncodingException {
         Map<String, String> parameters = new HashMap<String, String>();
 
         String uri = SEND_SMS_URI;
+        uri = uri
+                .replace("{version}", URLEncoder.encode(version, "ISO-8859-1"));
         uri = uri.replace("{shortCode}",
                 URLEncoder.encode(shortCode, "ISO-8859-1"));
 
@@ -111,17 +132,7 @@ public class SmsService {
 
         return UriBuilder.buildToString(uri, parameters);
     }
-
-    private StringEntity buildJsonStringEntity(String recipientNumber,
-            String message) throws UnsupportedEncodingException, JSONException {
-        JSONObject requestContent = new JSONObject();
-        requestContent.put("address", recipientNumber);
-        requestContent.put("message", message);
-
-        StringEntity stringEntity = new StringEntity(requestContent.toString());
-        return stringEntity;
-    }
-
+    
     /**
      * Parses a raw body sent by the system to the configured notifyURL (in the
      * Globe Labs developer site) into an SMS response.
@@ -149,8 +160,26 @@ public class SmsService {
         return response;
     }
 
-    public HttpPostClient getClient() {
-        return client;
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getShortCode() {
+        return shortCode;
+    }
+
+    public void setShortCode(String shortCode) {
+        this.shortCode = shortCode;
+    }
+
+    @Override
+    public String toString() {
+        return "Sms [client=" + client + ", version=" + version
+                + ", shortCode=" + shortCode + "]";
     }
 
 }

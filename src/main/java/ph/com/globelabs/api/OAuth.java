@@ -1,4 +1,4 @@
-package ph.com.globelabs.api.service;
+package ph.com.globelabs.api;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -13,24 +13,24 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.utils.URIBuilder;
 import org.json.JSONException;
 
-import ph.com.globelabs.api.exception.ServiceException;
+import ph.com.globelabs.api.exception.GlobeApiException;
 import ph.com.globelabs.api.request.HttpPostClient;
 import ph.com.globelabs.api.response.AccessTokenResponse;
 import ph.com.globelabs.api.util.UriBuilder;
 
-public class GlobeOAuthService {
+public class OAuth {
 
     private final static String REQUEST_URI = "http://developer.globelabs.com.ph/dialog/oauth";
     private final static String ACCESS_URI = "http://developer.globelabs.com.ph/oauth/access_token";
 
     protected HttpPostClient client;
 
-    public GlobeOAuthService() throws ServiceException {
+    public OAuth() throws GlobeApiException {
         super();
         try {
             client = new HttpPostClient();
         } catch (UnsupportedEncodingException e) {
-            throw new ServiceException(e.getMessage(), e);
+            throw new GlobeApiException(e.getMessage(), e);
         }
     }
 
@@ -41,9 +41,9 @@ public class GlobeOAuthService {
      * @param appId
      *            Given app ID by Globe Labs
      * @return Login URL for user subscription and authentication to the app
-     * @throws ServiceException
+     * @throws GlobeApiException
      */
-    public String getLoginUrl(String appId) throws ServiceException {
+    public String getLoginUrl(String appId) throws GlobeApiException {
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put("app_id", appId);
 
@@ -51,7 +51,7 @@ public class GlobeOAuthService {
             String loginUrl = UriBuilder.buildToString(REQUEST_URI, parameters);
             return loginUrl;
         } catch (URISyntaxException e) {
-            throw new ServiceException(
+            throw new GlobeApiException(
                     "Given appId is invalid. Login URL cannot be parsed.", e);
         }
     }
@@ -68,10 +68,10 @@ public class GlobeOAuthService {
      *            The code sent by Globe Labs to the callback URL after
      *            subscriber has completed the web authentication process
      * @return Access token and subscriber number
-     * @throws ServiceException
+     * @throws GlobeApiException
      */
     public AccessTokenResponse getAccessToken(String appId, String appSecret,
-            String code) throws ServiceException {
+            String code) throws GlobeApiException {
         Map<String, String> parameters = new HashMap<String, String>();
         parameters.put("app_id", appId);
         parameters.put("app_secret", appSecret);
@@ -94,15 +94,15 @@ public class GlobeOAuthService {
                         .getReasonPhrase());
             }
         } catch (ClientProtocolException e) {
-            throw new ServiceException(e.getMessage(), e);
+            throw new GlobeApiException(e.getMessage(), e);
         } catch (URISyntaxException e) {
-            throw new ServiceException(e.getMessage(), e);
+            throw new GlobeApiException(e.getMessage(), e);
         } catch (IOException e) {
-            throw new ServiceException(e.getMessage(), e);
+            throw new GlobeApiException(e.getMessage(), e);
         } catch (IllegalStateException e) {
-            throw new ServiceException(e.getMessage(), e);
+            throw new GlobeApiException(e.getMessage(), e);
         } catch (JSONException e) {
-            throw new ServiceException(e.getMessage(), e);
+            throw new GlobeApiException(e.getMessage(), e);
         }
     }
 
@@ -115,10 +115,10 @@ public class GlobeOAuthService {
      *            the system upon SMS subscription by the user. Query parameters
      *            must include access_token and subscription_number.
      * @return Access token and subscriber number
-     * @throws ServiceException
+     * @throws GlobeApiException
      */
     public AccessTokenResponse getAccessToken(String requestURL)
-            throws ServiceException {
+            throws GlobeApiException {
         try {
             URIBuilder builder = new URIBuilder(requestURL);
             List<NameValuePair> queryParams = builder.getQueryParams();
@@ -135,12 +135,12 @@ public class GlobeOAuthService {
             }
 
             if (accessToken == null || subscriberNumber == null) {
-                throw new ServiceException("Request URL cannot be parsed");
+                throw new GlobeApiException("Request URL cannot be parsed");
             } else {
                 return new AccessTokenResponse(accessToken, subscriberNumber);
             }
         } catch (URISyntaxException e) {
-            throw new ServiceException("Request URL cannot be parsed", e);
+            throw new GlobeApiException("Request URL cannot be parsed", e);
         }
     }
 
