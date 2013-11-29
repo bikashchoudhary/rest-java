@@ -83,7 +83,7 @@ public class SmsTest {
                 + "\"totalNumberOfPendingMessages\":0}}";
         SmsResponse response = sms.getMessage(rawBody);
         assertNotNull(response);
-        
+
         assertEquals(1, response.getNumberOfMessagesInThisBatch());
 
         List<InboundSmsMessage> messages = response.getInboundSmsMessages();

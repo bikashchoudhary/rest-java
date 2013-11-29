@@ -13,6 +13,7 @@ import org.json.JSONException;
 import ph.com.globelabs.api.exception.GlobeApiException;
 import ph.com.globelabs.api.exception.ParameterRequiredException;
 import ph.com.globelabs.api.request.HttpPostClient;
+import ph.com.globelabs.api.response.InboundSmsMessage;
 import ph.com.globelabs.api.response.SendSmsResponse;
 import ph.com.globelabs.api.response.SmsResponse;
 import ph.com.globelabs.api.util.UriBuilder;
@@ -144,9 +145,9 @@ public class Sms {
      *            destinationAddress, messageId, message, resourceURL, and
      *            senderAddress.
      * @return SMS Response object which includes a list of messages of type
-     *         {@link InboundSmsMessage), number of messages in the batch, total
+     *         {@link InboundSmsMessage}, number of messages in the batch, total
      *         number of pending messages, and resourceURL.
-     *
+     * 
      * @throws GlobeApiException
      */
     public SmsResponse getMessage(String rawBody) throws GlobeApiException {
