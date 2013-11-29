@@ -4,14 +4,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.json.JSONException;
 
 import ph.com.globelabs.api.exception.GlobeApiException;
@@ -64,9 +60,9 @@ public class Sms {
      * @throws ParameterRequiredException
      * @throws GlobeApiException
      */
-    public SendSmsResponse sendMessage(String subscriberNumber, String accessToken,
-            String message) throws ParameterRequiredException,
-            GlobeApiException {
+    public SendSmsResponse sendMessage(String subscriberNumber,
+            String accessToken, String message)
+            throws ParameterRequiredException, GlobeApiException {
         try {
             validateParameters(subscriberNumber, accessToken, message);
 
@@ -140,25 +136,26 @@ public class Sms {
      * 
      * @param rawBody
      *            The content sent by the system to the notifyURL of content
-     *            type "application/x-www-form-urlencoded" and charset UTF-8. <br />
+     *            type "application/json" and charset UTF-8. <br />
      *            Parameters must consist of the following: <br />
-     *            command_length, command_id, command_status, sequence_number,
-     *            command, service_type, source_addr_ton, source_addr_npi,
-     *            source_addr, dest_addr_ton, dest_addr_npi, destination_addr,
-     *            esm_class, protocol_id, priority_flag, schedule_delivery_time,
-     *            validity_period, registered_delivery, replace_if_present_flag,
-     *            data_coding, sm_default_msg_id, short_message[message],
-     *            source_network_type, dest_network_type,
-     *            message_payload[message].
-     * @return SMS Response object which includes the message, sourceAddr (where
-     *         the message came from), and destAddr (to which number the message
-     *         was sent) among other fields parsed from the rawBody.
+     *            inboundSMSMessageList, numberOfMessagesInThisBatch,
+     *            resourceURL, totalNumberOfPendingMessages, and
+     *            inboundSMSMessage (array which consists of dateTime,
+     *            destinationAddress, messageId, message, resourceURL, and
+     *            senderAddress.
+     * @return SMS Response object which includes a list of messages of type
+     *         {@link InboundSmsMessage), number of messages in the batch, total
+     *         number of pending messages, and resourceURL.
+     *
+     * @throws GlobeApiException
      */
-    public SmsResponse getMessage(String rawBody) {
-        List<NameValuePair> nameValuePairs = URLEncodedUtils.parse(rawBody,
-                Charset.defaultCharset());
-        SmsResponse response = new SmsResponse(nameValuePairs);
-        return response;
+    public SmsResponse getMessage(String rawBody) throws GlobeApiException {
+        try {
+            SmsResponse response = new SmsResponse(rawBody);
+            return response;
+        } catch (JSONException e) {
+            throw new GlobeApiException("Raw body cannot be parsed.");
+        }
     }
 
     public String getVersion() {
